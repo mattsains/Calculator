@@ -42,11 +42,11 @@ grammar Expression
   end
 
   rule brackets
-    '(' numeric_expr ')'
+    '(' weak_num ')'
   end
   
   rule id
-    [a-zA-Z] [a-zA-Z0-9]+
+    [a-zA-Z] [a-zA-Z0-9]*
   end
   
   rule number

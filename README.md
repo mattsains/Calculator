@@ -17,7 +17,7 @@ I decided to make this because I couldn't find a calculator that worked with me 
 #### Wants
 - Lazy evaluation
 - I'd like it to have a functional feel, although imperative might be easier to deal with on a day-to-day
-- In accordance with the 'minimize pedantry' phiolosophy, the calculator should have lots of implicit casting/coercion. Basically I just want an answer, I don't care what it had to do to the data to get there
+- In accordance with the 'minimize pedantry' philosophy, the calculator should have lots of implicit casting/coercion. Basically I just want an answer, I don't care what it had to do to the data to get there
 
 #### Don't cares
 - Don't need closures

@@ -1,0 +1,68 @@
+grammar Expression
+  #everything must match this
+  rule expression
+    array / weak_num
+  end
+
+  rule array
+    '[' ( ( expression ',' )* expression )? ']'
+  end
+
+  rule weak_num
+    plus / minus / tight_num
+  end
+
+  rule plus
+    tight_num '+' weak_num
+  end
+
+  rule minus
+    tight_num '-' weak_num /
+    '-' tight_num
+  end
+
+  rule tight_num
+    mul / div / val
+  end
+  
+  rule mul
+    val '*' ( tight_num )
+  end
+
+  rule div
+    val '/' ( tight_num )
+  end
+
+  rule seq
+    val '..' val
+  end
+
+  rule val
+    id / number / brackets
+  end
+
+  rule brackets
+    '(' numeric_expr ')'
+  end
+  
+  rule id
+    [a-zA-Z] [a-zA-Z0-9]+
+  end
+  
+  rule number
+    dec / hex / bin / oct
+  end
+
+  rule dec
+    ( [1-9]+ [0-9]* / '0') ('.' [0-9]+)?
+  end
+  rule hex
+    ( '0x' [0-F]+ ) / ( [0-F]+ 'h')
+  end
+  rule bin
+    '0b' [01]+
+  end      
+  rule oct
+    '0' [0-7]+
+  end
+end

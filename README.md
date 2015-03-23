@@ -21,4 +21,4 @@ I decided to make this because I couldn't find a calculator that worked with me 
 
 #### Don't cares
 - Don't need closures
-- Don't need fancy scoping - I'd be okay with global
+- Don't need fancy scoping - I'd be okay with global everything

@@ -7,21 +7,21 @@ grammar Expression
         e2.eval
       end
     } /
-    e1:id
-    {
-      def eval
-        result = e1.eval
-        imm = e1.text_value
-        pprint "#{imm} = #{result}"
-        result
-      end
-    } /
     e3:( array / weak_num / seq )
     {
       def eval
         result = e3.eval
         imm = "v#{$context.line+=1}"
         $context.var[imm]=result
+        pprint "#{imm} = #{result}"
+        result
+      end
+    } /
+    e1:id
+    {
+      def eval
+        result = e1.eval
+        imm = e1.text_value
         pprint "#{imm} = #{result}"
         result
       end
@@ -135,7 +135,7 @@ grammar Expression
   end
 
   rule val
-    id / number / index / brackets
+    index / id / number / brackets
   end
 
   rule index

@@ -2,28 +2,31 @@ require 'polyglot'
 require 'treetop'
 require 'readline'
 
-def print_tree t, depth = 0
-  if t !=nil
-    print " "*depth
-    puts (t.extension_modules[0].inspect.split "::")[1]
-    
-    if t.elements != nil
-      for c in t.elements
-        print_tree(c, depth+1) unless c.extension_modules[0] == nil
-      end
-    end
-  end
+Context = Struct.new :line, :var
+$context = Context.new 0, {}
+$context.line = 0
+
+def defined str
+  $context.var.has_key? str
+end
+
+def pprint str
+  puts "  #{str}"
 end
 
 while line = Readline.readline("> ", true)
   Treetop.load 'grammar'
   parser = ExpressionParser.new
   next if line == 'r'
-  result = parser.parse line.gsub(/\s+/, "")
-  if result == nil
-    puts "   " + parser.failure_reason
-  else
-    puts "  = " + result.eval.to_s
+  begin
+    expression = parser.parse line.gsub(/\s+/, "")
+    if expression == nil
+      puts "   Error: " + parser.failure_reason
+    end
+#    p expression
+    expression.eval
+  rescue Exception => e
+    puts   "   Error: #{e.message}"
   end
 end
 puts "exit"

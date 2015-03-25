@@ -1,14 +1,55 @@
 grammar Expression
   #everything must match this
-  rule expression
-    e:( array / weak_num / seq )
+  rule top_expression
+    e2:assignment
     {
       def eval
-        e.eval
+        e2.eval
+      end
+    } /
+    e1:id
+    {
+      def eval
+        result = e1.eval
+        imm = e1.text_value
+        pprint "#{imm} = #{result}"
+        result
+      end
+    } /
+    e3:( array / weak_num / seq )
+    {
+      def eval
+        result = e3.eval
+        imm = "v#{$context.line+=1}"
+        $context.var[imm]=result
+        pprint "#{imm} = #{result}"
+        result
       end
     }
   end
 
+  rule expression
+    e2:assignment
+    {
+      def eval
+        e2.eval
+      end
+    } /
+    array / weak_num / seq
+  end
+  
+  rule assignment
+    e1:id '=' e2:expression 
+    {
+      def eval
+        val = e2.eval
+        imm = e1.text_value
+        $context.var[imm] = val
+        pprint "#{imm} = #{val}"
+      end
+    }
+  end
+  
   rule array
     '[' e1:expression (',' en:expression )* ']'
     {
@@ -25,6 +66,10 @@ grammar Expression
     plus / minus / tight_num
   end
 
+  rule weak_num_except_id
+    plus / minus / tight_num_except_id
+  end
+  
   rule plus
     e1:tight_num '+' e2:weak_num {
       def eval
@@ -49,6 +94,10 @@ grammar Expression
 
   rule tight_num
     mul / div / val
+  end
+
+  rule tight_num_except_id
+    mul / div / val_except_id
   end
   
   rule mul
@@ -79,6 +128,10 @@ grammar Expression
     id / number / brackets
   end
 
+  rule val_except_id
+    number / brackets
+  end
+  
   rule brackets
     '(' weak_num ')' {
       def eval
@@ -88,7 +141,12 @@ grammar Expression
   end
   
   rule id
-    [a-zA-Z] [a-zA-Z0-9]*
+    e:([a-zA-Z] [a-zA-Z0-9]*) {
+      def eval
+        raise "#{e.text_value} undefined." unless defined e.text_value
+        $context.var[e.text_value]
+      end
+    }    
   end
   
   rule number

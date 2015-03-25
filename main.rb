@@ -1,5 +1,6 @@
 require 'polyglot'
 require 'treetop'
+require 'readline'
 
 def print_tree t, depth = 0
   if t !=nil
@@ -14,16 +15,16 @@ def print_tree t, depth = 0
   end
 end
 
-while true
+while line = Readline.readline("> ", true)
   Treetop.load 'grammar'
   parser = ExpressionParser.new
-  print "> "
-  input = gets.chomp
-  next if input == 'r'
-  result = parser.parse input
+  next if line == 'r'
+  result = parser.parse line
   if result == nil
-    puts parser.failure_reason
+    puts "   " + parser.failure_reason
   else
-    puts result.eval
+    puts "   =" + result.eval.to_s
   end
 end
+puts "exit"
+puts "Goodbye!"

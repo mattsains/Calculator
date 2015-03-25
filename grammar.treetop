@@ -94,7 +94,11 @@ grammar Expression
   rule dec
     e:(([1-9]+ [0-9]* / '0') ('.' [0-9]+)?) {
       def eval
-        e.text_value.to_f
+        if e.text_value.include? '.'
+          e.text_value.to_f
+        else
+          e.text_value.to_i
+        end
       end
     }
   end

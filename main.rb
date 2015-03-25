@@ -7,6 +7,9 @@ Context = Struct.new :line, :var, :last
 $context = Context.new 0, {}
 $context.line = 0
 
+Function = Struct.new :tree, :var_names
+
+
 def defined str
   $context.var.has_key? str
 end

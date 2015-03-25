@@ -39,9 +39,34 @@ grammar Expression
       def eval
         e.eval
       end
+    } /
+    e:function {
+      def eval
+        e.decl
+      end
     }
   end
-  
+
+  rule function
+    '{' id e2:(',' id)* ':' expression '}' {
+      def eval func, args
+        params = [id.text_value]
+        for e in e2.elements
+          params << e.elements[1].text_value
+        end
+        throw Exception.new "Function #{id} expects #{params.length} arguments, #{args.length} given" if params.length != args.length        
+      end
+
+      def decl
+        params = [id.text_value]
+        for e in e2.elements
+          params << e.elements[1].text_value
+        end
+        Function.new self, params
+      end
+    }
+  end
+      
   rule assignment
     e1:id '=' e2:expression 
     {
@@ -49,7 +74,11 @@ grammar Expression
         val = e2.eval
         imm = e1.text_value
         $context.var[imm] = val
-        pprint "#{imm} = #{val}"
+        if val.is_a? Function
+          pprint "#{imm}: func("+val.var_names.join(",")+")"
+        else
+          pprint "#{imm} = #{val}"
+        end
       end
     }
   end

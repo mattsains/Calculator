@@ -19,11 +19,11 @@ while line = Readline.readline("> ", true)
   Treetop.load 'grammar'
   parser = ExpressionParser.new
   next if line == 'r'
-  result = parser.parse line
+  result = parser.parse line.gsub(/\s+/, "")
   if result == nil
     puts "   " + parser.failure_reason
   else
-    puts "   =" + result.eval.to_s
+    puts "  = " + result.eval.to_s
   end
 end
 puts "exit"

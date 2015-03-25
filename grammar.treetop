@@ -80,7 +80,11 @@ grammar Expression
   end
 
   rule brackets
-    '(' weak_num ')'
+    '(' weak_num ')' {
+      def eval
+        weak_num.eval
+      end
+    }
   end
   
   rule id

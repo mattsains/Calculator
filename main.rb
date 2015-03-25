@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'polyglot'
 require 'treetop'
 require 'readline'
@@ -21,9 +22,8 @@ while line = Readline.readline("> ", true)
   begin
     expression = parser.parse line.gsub(/\s+/, "")
     if expression == nil
-      puts "   Error: " + parser.failure_reason
+      raise Exception.new parser.failure_reason
     end
-#    p expression
     $context.last = expression.eval
   rescue Exception => e
     puts   "   Error: #{e.message}"

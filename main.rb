@@ -2,7 +2,7 @@ require 'polyglot'
 require 'treetop'
 require 'readline'
 
-Context = Struct.new :line, :var
+Context = Struct.new :line, :var, :last
 $context = Context.new 0, {}
 $context.line = 0
 
@@ -24,7 +24,7 @@ while line = Readline.readline("> ", true)
       puts "   Error: " + parser.failure_reason
     end
 #    p expression
-    expression.eval
+    $context.last = expression.eval
   rescue Exception => e
     puts   "   Error: #{e.message}"
   end

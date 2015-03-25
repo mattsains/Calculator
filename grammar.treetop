@@ -146,7 +146,16 @@ grammar Expression
         raise "#{e.text_value} undefined." unless defined e.text_value
         $context.var[e.text_value]
       end
-    }    
+    } /
+    '`' {
+      def eval
+        if $context.last != nil
+           $context.last
+        else
+           raise "There is no last expression"
+        end
+      end
+    }
   end
   
   rule number

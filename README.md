@@ -13,7 +13,7 @@ I decided to make this because I couldn't find a calculator that worked with me 
 #### Design Facts
 - Conventional mathematical operators (ie., infix for the most part. Unary operators are polish)
 - Numbers can be arbitrarily large
-- `\`` represents the last value calculated
+- `` ` `` represents the last value calculated
 
 #### Wants
 - Lazy evaluation

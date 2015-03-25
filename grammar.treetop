@@ -1,11 +1,24 @@
 grammar Expression
   #everything must match this
   rule expression
-    array / weak_num
+    e:( array / weak_num / seq )
+    {
+      def eval
+        e.eval
+      end
+    }
   end
 
   rule array
-    '[' ( ( expression ',' )* expression )? ']'
+    '[' e1:expression (',' en:expression )* ']'
+    {
+      def eval
+        for e in elements.select {|e| e.nonterminal?}
+          p e.en
+          p e.en.eval
+        end
+      end
+    }
   end
 
   rule weak_num
@@ -13,12 +26,25 @@ grammar Expression
   end
 
   rule plus
-    tight_num '+' weak_num
+    e1:tight_num '+' e2:weak_num {
+      def eval
+        e1.eval + e2.eval
+      end
+    }
   end
 
   rule minus
-    tight_num '-' weak_num /
-    '-' tight_num
+    e1:tight_num '-' e2:weak_num {
+      def eval
+        e1.eval - e2.eval
+      end
+    }
+    /
+    '-' e:tight_num {
+      def eval
+        -e.eval
+      end
+    }
   end
 
   rule tight_num
@@ -26,15 +52,27 @@ grammar Expression
   end
   
   rule mul
-    val '*' ( tight_num )
+    e1:val '*' e2:tight_num {
+      def eval
+        e1.eval * e2.eval
+      end
+    }
   end
 
   rule div
-    val '/' ( tight_num )
+    e1:val '/' e2:tight_num {
+      def eval
+        e1.eval / e2.eval
+      end
+    }
   end
 
   rule seq
-    val '..' val
+    ( e1:val '..' e2:val ) {
+      def eval
+        e1.eval .. e2.eval
+      end
+    }
   end
 
   rule val
@@ -50,19 +88,38 @@ grammar Expression
   end
   
   rule number
-    dec / hex / bin / oct
+    hex / dec / bin / oct
   end
 
   rule dec
-    ( [1-9]+ [0-9]* / '0') ('.' [0-9]+)?
+    e:(([1-9]+ [0-9]* / '0') ('.' [0-9]+)?) {
+      def eval
+        e.text_value.to_f
+      end
+    }
   end
+  
   rule hex
-    ( '0x' [0-F]+ ) / ( [0-F]+ 'h')
+    e:(( '0x' [0-F]+ ) / ( [0-F]+ 'h')) {
+      def eval
+        e.text_value.to_i
+      end
+    }
   end
+  
   rule bin
-    '0b' [01]+
-  end      
+    e:( '0b' [01]+ ) {
+      def eval
+        e.text_value.to_i
+      end
+    }
+  end
+  
   rule oct
-    '0' [0-7]+
+    e:('0' [0-7]+) {
+      def eval
+        e.text_value.to_i
+      end
+    }
   end
 end

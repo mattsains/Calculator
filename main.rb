@@ -24,6 +24,6 @@ while true
   if result == nil
     puts parser.failure_reason
   else
-    puts print_tree result
+    puts result.eval
   end
 end

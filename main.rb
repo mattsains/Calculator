@@ -2,24 +2,62 @@
 require 'polyglot'
 require 'treetop'
 require 'readline'
+require File.dirname(__FILE__)+'/grammar.rb'
 
-Context = Struct.new :line, :var, :last
-$context = Context.new 0, {}
-$context.line = 0
+class Context
+  attr_accessor :parent
+  attr_accessor :line
+  @var
+  attr_accessor :last
 
-Function = Struct.new :tree, :var_names
+  def initialize parent=nil
+    @parent = parent
+    @line = 0
+    @var = {}
+    @last = nil
+  end
 
+  def var id, val=nil
+    if val != nil
+      @var[id] = val
+    else
+      if @var.has_key? id
+        @var[id]
+      elsif @parent == nil
+        raise Exception.new "#{id} undefined."
+      else
+        @parent.var id
+      end
+    end
+  end
 
-def defined str
-  $context.var.has_key? str
+  def defined? id
+    if @var.has_key? id
+      true
+    elsif @parent == nil
+      false
+    else
+      @parent.var[id]
+    end
+  end
 end
 
-def pprint str
-  puts "  #{str}"
+$context = Context.new #forms a linked list stack of contexts
+
+def pprint val, id=nil
+  str = "  "
+  if id != nil
+    str+="#{id} = "
+  end
+  if val.methods.include? :print
+    str += val.print
+  else
+    str += val.to_s
+  end
+  puts str
 end
 
 while line = Readline.readline("> ", true)
-  Treetop.load 'grammar'
   parser = ExpressionParser.new
   next if line == 'r'
   begin
@@ -28,8 +66,8 @@ while line = Readline.readline("> ", true)
       raise Exception.new parser.failure_reason
     end
     $context.last = expression.eval
-  rescue Exception => e
-    puts   "   Error: #{e.message}"
+  #rescue Exception => e
+  #  puts   "   Error: #{e.message}"
   end
 end
 puts "exit"

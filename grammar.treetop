@@ -12,8 +12,8 @@ grammar Expression
       def eval
         result = e3.eval
         imm = "v#{$context.line+=1}"
-        $context.var[imm]=result
-        pprint "#{imm} = #{result}"
+        $context.var imm, result
+        pprint result, imm
         result
       end
     } /
@@ -22,7 +22,7 @@ grammar Expression
       def eval
         result = e1.eval
         imm = e1.text_value
-        pprint "#{imm} = #{result}"
+        pprint result, imm
         result
       end
     }
@@ -42,43 +42,49 @@ grammar Expression
     } /
     e:function {
       def eval
-        e.decl
+        e
       end
     }
   end
 
   rule function
     '{' id e2:(',' id)* ':' expression '}' {
-      def eval func, args
+      def eval args
         params = [id.text_value]
         for e in e2.elements
           params << e.elements[1].text_value
         end
-        throw Exception.new "Function #{id} expects #{params.length} arguments, #{args.length} given" if params.length != args.length        
+        if params.length != args.length
+          raise Exception.new "Function #{id} expects #{params.length} arguments, #{args.length} given"
+        else
+          $context = Context.new $context
+          params.zip(args).each {|param, arg|
+            $context.var param, arg
+          }
+          result = expression.eval
+          $context = $context.parent
+          result
+        end
       end
 
-      def decl
-        params = [id.text_value]
+      def print
+        str = "func("+id.text_value
         for e in e2.elements
-          params << e.elements[1].text_value
+          str+= "," + e.elements[1].text_value
         end
-        Function.new self, params
+        str+= ")"
       end
     }
   end
       
   rule assignment
-    e1:id '=' e2:expression 
+    e1:id '=' e2:expression
     {
       def eval
         val = e2.eval
         imm = e1.text_value
-        $context.var[imm] = val
-        if val.is_a? Function
-          pprint "#{imm}: func("+val.var_names.join(",")+")"
-        else
-          pprint "#{imm} = #{val}"
-        end
+        $context.var imm, val
+        pprint val, imm
       end
     }
   end
@@ -164,13 +170,32 @@ grammar Expression
   end
 
   rule val
-    index / id / number / brackets
+    index / func_apply / id / number / brackets
   end
 
   rule index
     id '[' val ']' {
       def eval
         id.eval[val.eval]
+      end
+    }
+  end
+
+  rule func_apply
+    id '()' {
+      def eval
+        ($context.var id.text_value).eval []
+      end
+    } /
+    id '(' e:expression en:(',' expression)* ')' {
+      def eval
+        f = $context.var id.text_value
+        args=[]
+        if e != nil
+          args << e.eval
+          en.elements.each {|e| args << e.elements[1].eval }
+        end
+        f.eval args
       end
     }
   end
@@ -186,8 +211,7 @@ grammar Expression
   rule id
     e:([a-zA-Z] [a-zA-Z0-9]*) {
       def eval
-        raise Exception.new "#{e.text_value} undefined." unless defined e.text_value
-        $context.var[e.text_value]
+        $context.var e.text_value
       end
     } /
     '`' {

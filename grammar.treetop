@@ -204,7 +204,11 @@ grammar Expression
   end
 
   rule val
-    index / func_apply / id / number / brackets
+    ws e:( index / func_apply / id / number / brackets ) ws {
+      def eval
+        e.eval
+      end
+    }
   end
 
   rule index
@@ -297,5 +301,9 @@ grammar Expression
         e.text_value.to_i(8)
       end
     }
+  end
+
+  rule ws
+    [ \t]*
   end
 end

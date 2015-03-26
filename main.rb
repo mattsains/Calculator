@@ -61,7 +61,7 @@ while line = Readline.readline("> ", true)
   parser = ExpressionParser.new
   next if line == 'r'
   begin
-    expression = parser.parse line.gsub(/\s+/, "")
+    expression = parser.parse line
     if expression == nil
       raise Exception.new parser.failure_reason
     end

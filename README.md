@@ -14,7 +14,9 @@ I decided to make this because I couldn't find a calculator that worked with me 
 - Conventional mathematical operators (ie., infix for the most part. Unary operators are polish)
 - Numbers can be arbitrarily large
 - `` ` `` represents the last value calculated
+- Functions are defined `{x,y,z: expression}` (for a function that takes three arguments and calculated `expression`) and called `f(x,y,z)` assuming the function has been assigned to the variable `f`. Functions can only exist as first clas citizens.
 - Functions can access parent scope'd variables. However, if a function tries to set a variable which already exists, the new value hides the other value. Ie., outside variables can be accessed but not changed.
+- Set builder notation is supported: `{ [x,y] | x = list1, y = list2 }` returns the cartesian product of `list1` and `list2`. Conveniently, this can be used to map a function over a list: `{ func(item) | item=list }`
 
 #### Wants
 - Lazy evaluation

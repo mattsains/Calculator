@@ -42,7 +42,28 @@ class Context
   end
 end
 
+class RubyFunc
+  @block
+  def initialize block
+    @block = block
+  end
+
+  def eval args
+    @block.call *args
+  end
+end
+  
 $context = Context.new #forms a linked list stack of contexts
+
+def def_fun(name, &block)
+  $context.var name.to_s, (RubyFunc.new block)
+end
+
+def def_var name, val
+  $context.var name.to_s, val
+end
+
+require File.dirname(__FILE__)+'/stdlib.rb'
 
 def pprint val, id=nil
   str = "  "

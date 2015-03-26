@@ -35,7 +35,7 @@ grammar Expression
         e2.eval
       end
     } /
-    e:( array / seq / weak_num ) {
+    ws e:( array / seq / weak_num ) ws {
       def eval
         e.eval
       end
@@ -48,11 +48,11 @@ grammar Expression
   end
 
   rule function
-    '{' id e2:(',' id)* ':' expression '}' {
+    ws '{' id e2:(',' id)* ':' ws expression ws '}' ws {
       def eval args
-        params = [id.text_value]
+        params = [id.text_value.strip]
         for e in e2.elements
-          params << e.elements[1].text_value
+          params << e.elements[1].text_value.strip
         end
         if params.length != args.length
           raise Exception.new "Function #{id} expects #{params.length} arguments, #{args.length} given"
@@ -68,9 +68,9 @@ grammar Expression
       end
 
       def print
-        str = "func("+id.text_value
+        str = "func("+id.text_value.strip
         for e in e2.elements
-          str+= "," + e.elements[1].text_value
+          str+= "," + e.elements[1].text_value.strip
         end
         str+= ")"
       end
@@ -82,7 +82,7 @@ grammar Expression
     {
       def eval
         val = e2.eval
-        imm = e1.text_value
+        imm = e1.text_value.strip
         $context.var imm, val
         pprint val, imm
       end
@@ -222,18 +222,41 @@ grammar Expression
   rule func_apply
     id '()' {
       def eval
-        ($context.var id.text_value).eval []
+        ($context.var id.text_value.strip).eval []
       end
     } /
     id '(' e:expression en:(',' expression)* ')' {
       def eval
-        f = $context.var id.text_value
+        f = $context.var id.text_value.strip
         args=[]
         if e != nil
           args << e.eval
           en.elements.each {|e| args << e.elements[1].eval }
         end
         f.eval args
+      end
+    } /
+    ws '{' ws e1:expression ws '|' ws e2:id '=' e3:expression e4:(',' id '=' expression)* '}' ws {
+      def eval
+        args = [e2.text_value.strip]
+        vals = [e3.eval.to_a]
+        for a in e4.elements
+          args << a.elements[1].text_value.strip
+          vals << a.elements[3].eval.to_a
+        end
+
+        result = []
+        
+        valcombs = vals[0].product(*vals[1..-1])
+        valcombs.each {|valset|
+          $context = Context.new $context
+          valset.each_index {|i|
+            $context.var args[i], valset[i]
+          }
+          result << e1.eval
+          $context = $context.parent
+        }
+        result
       end
     }
   end
@@ -247,12 +270,12 @@ grammar Expression
   end
   
   rule id
-    e:([a-zA-Z] [a-zA-Z0-9]*) {
+    ws e:([a-zA-Z] [a-zA-Z0-9]*) ws {
       def eval
         $context.var e.text_value
       end
     } /
-    '`' {
+    ws '`' ws {
       def eval
         if $context.last != nil
            $context.last

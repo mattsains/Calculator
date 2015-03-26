@@ -7,7 +7,7 @@ grammar Expression
         e2.eval
       end
     } /
-    e3:( array / weak_num / seq )
+    e3:( array / seq / weak_num )
     {
       def eval
         result = e3.eval
@@ -35,7 +35,7 @@ grammar Expression
         e2.eval
       end
     } /
-    e:( array / weak_num / seq ) {
+    e:( array / seq / weak_num ) {
       def eval
         e.eval
       end
@@ -134,7 +134,7 @@ grammar Expression
   end
 
   rule tight_num
-    mul / div / mod / val
+    mul / div / mod / very_tight_num
   end
   
   rule mul
@@ -156,13 +156,47 @@ grammar Expression
   rule div
     e1:val '/' e2:tight_num {
       def eval
-        e1.eval / e2.eval
+        v1 = e1.eval
+        v2 = e2.eval
+        if (v1 % v2 != 0 or v1.is_a? Float or v2.is_a? Float)
+          v1.fdiv v2
+        else
+          v1 / v2
+        end
       end
     }
   end
 
+  rule very_tight_num
+    pow / shl / shr / val
+  end
+
+  rule pow
+    val '^' very_tight_num {
+      def eval
+        val.eval ** very_tight_num.eval
+      end
+    }
+  end
+
+  rule shl
+    e1:val '<<' e2:val {
+      def eval
+        e1.eval << e2.eval
+      end
+    }
+  end
+
+  rule shr
+    e1:val '>>' e2:val {
+      def eval
+        e1.eval >> e2.eval
+      end
+    }
+  end
+  
   rule seq
-    ( e1:val '..' e2:val ) {
+    e1:val '..' e2:val {
       def eval
         e1.eval .. e2.eval
       end

@@ -7,8 +7,8 @@ require File.dirname(__FILE__)+'/grammar.rb'
 class Context
   attr_accessor :parent
   attr_accessor :line
-  @var
   attr_accessor :last
+  @var
 
   def initialize parent=nil
     @parent = parent

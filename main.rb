@@ -66,8 +66,8 @@ while line = Readline.readline("> ", true)
       raise Exception.new parser.failure_reason
     end
     $context.last = expression.eval
-  #rescue Exception => e
-  #  puts   "   Error: #{e.message}"
+  rescue Exception => e
+    puts   "   Error: #{e.message}"
   end
 end
 puts "exit"
